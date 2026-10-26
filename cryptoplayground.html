@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CryptoPlayground — Build cryptography by drawing it</title>
+  <meta name="description" content="CryptoPlayground is a macOS app for exploring cryptography: drag hashes, ciphers, signatures and key exchanges onto a canvas, connect them and see live results, with generated C++ and Python code and textbook diagrams.">
+  <link rel="canonical" href="https://grablogic.com/cryptoplayground.html">
+  <link rel="icon" href="cryptoplayground-icon.png" type="image/png">
+  <meta property="og:type" content="product">
+  <meta property="og:title" content="CryptoPlayground — Build cryptography by drawing it">
+  <meta property="og:description" content="Drag, connect and see every result instantly. 121 elements, live C++ and Python code, textbook diagrams.">
+  <meta property="og:url" content="https://grablogic.com/cryptoplayground.html">
+  <meta property="og:image" content="https://grablogic.com/cp-canvas.jpg">
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./">GrabLogic</a>
+  </div>
+</header>
+
+
+<main>
+
+  <section class="hero app-hero">
+    <div class="wrap">
+      <img class="app-icon" src="cryptoplayground-icon.png" alt="CryptoPlayground icon" width="112" height="112">
+      <h1>CryptoPlayground</h1>
+      <p class="lead">Build cryptography by drawing it. Drag hashes, ciphers, signatures and key exchanges onto a canvas,
+        connect them, and watch every value update instantly.</p>
+      <div class="actions">
+        <a class="button primary" href="CryptoPlayground.dmg" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+          Download for macOS
+        </a>
+        <a class="button ghost" href="#features">See what it does</a>
+      </div>
+      <p class="meta"><span>Version 1.0</span><span>28 MB</span><span>macOS 14.4 or later, Intel and Apple Silicon</span></p>
+      <div class="shot hero-shot">
+        <img src="cp-canvas.jpg" alt="The CryptoPlayground canvas: two EC key pairs feed ECDH, HKDF derives an AES key, and AES-256-GCM encrypts a message" width="2000" height="1194">
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="wrap">
+
+      <div class="feature">
+        <div class="feature-text">
+          <span class="eyebrow">Drag, connect, see</span>
+          <h2>Every output, live</h2>
+          <p>Each element is a real operation — a hash, a cipher, a signature, a key exchange. The output of one becomes
+            the input of the next. Change a byte anywhere and everything downstream is recalculated at once.</p>
+          <ul class="checks">
+            <li>Real cryptographic results, not simulations</li>
+            <li>Clear messages when an input is missing or a key is wrong</li>
+            <li>Logic elements (equals, greater than, if / else) for verification flows</li>
+            <li>Undo and redo, projects saved as files</li>
+          </ul>
+        </div>
+        <div class="shot">
+          <img src="cp-code.jpg" alt="The canvas with the generated C++ program in the Code view" width="2000" height="1194" loading="lazy">
+        </div>
+      </div>
+
+      <div class="feature flip">
+        <div class="feature-text">
+          <span class="eyebrow">Textbook diagrams</span>
+          <h2>The drawing from the paper — from your graph</h2>
+          <p>The Diagram view redraws your graph in the notation of cryptography papers and textbooks:
+            <em>E</em>, <em>H</em>, KeyGen, ⊕ and ‖, keys from the top, IVs and salts from below.
+            Arrange boxes and lines by hand, add notes, leave helper steps out, and export as PNG or SVG.</p>
+        </div>
+        <div class="shot paper">
+          <img src="cp-diagram.png" alt="Textbook diagram: KeyGen for Alice and Bob, DH, HKDF and encryption E with AES-256-GCM" width="1600" height="801" loading="lazy">
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-text">
+          <span class="eyebrow">Real code</span>
+          <h2>C++ and Python, written for you</h2>
+          <p>The Code view turns the graph into a complete program — in C++, or in Python with
+            the <code>cryptography</code> package. Copy it into your project: it compiles, runs and produces the same results
+            as the app.</p>
+        </div>
+        <pre class="code"><span class="c"># ECDH: shared secret</span>
+ecdh = load_private_key(alice_private).<span class="f">exchange</span>(
+    ec.ECDH(), load_public_key(bob_public))
+
+<span class="c"># HKDF: AES key</span>
+key = <span class="f">HKDF</span>(algorithm=hashes.SHA256(), length=<span class="k">32</span>,
+           salt=<span class="k">None</span>, info=<span class="s">"chat v1"</span>.encode()).<span class="f">derive</span>(ecdh)
+
+<span class="c"># AES Encrypt</span>
+nonce = os.<span class="f">urandom</span>(<span class="k">12</span>)
+ctx = <span class="f">Cipher</span>(algorithms.AES(key), modes.GCM(nonce)).<span class="f">encryptor</span>()
+ciphertext = ctx.<span class="f">update</span>(<span class="s">b"Meet me at noon"</span>) + ctx.<span class="f">finalize</span>()</pre>
+      </div>
+
+      <div class="feature flip">
+        <div class="feature-text">
+          <span class="eyebrow">Learn as you go</span>
+          <h2>Every element explained</h2>
+          <p>Select an element and the Info panel tells you what it does, what each input means and why it is needed,
+            which standards define it, and what to watch out for — like never reusing a GCM nonce.</p>
+        </div>
+        <div class="shot">
+          <img src="cp-info.jpg" alt="The Info panel explaining AES-256-GCM, its inputs and its outputs" width="2000" height="1194" loading="lazy">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="elements">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">121 elements</span>
+        <h2>From SHA-256 to ML-KEM</h2>
+        <p>Organized by technology, searchable, and dragged onto the canvas from the Elements panel.</p>
+      </div>
+      <div class="groups">
+        <article class="group">
+          <header><span class="badge" style="background:#ab47bc">#</span><h3>Hash</h3><span class="count">29</span></header>
+          <p>SHA-1, SHA-2, SHA-3, SHAKE, BLAKE2, RIPEMD-160, SM3, MD5 and more.</p>
+        </article>
+        <article class="group">
+          <header><span class="badge" style="background:#428bf5">AES</span><h3>Symmetric ciphers</h3><span class="count">14</span></header>
+          <p>AES (GCM, CBC, CTR, …), ChaCha20-Poly1305, ARIA, Camellia, SM4, DES and legacy ciphers.</p>
+        </article>
+        <article class="group">
+          <header><span class="badge" style="background:#5c6bc0">MAC</span><h3>MAC</h3><span class="count">9</span></header>
+          <p>HMAC, CMAC, GMAC, KMAC, Poly1305, SipHash, BLAKE2 MAC.</p>
+        </article>
+        <article class="group">
+          <header><span class="badge" style="background:#ff9800">KDF</span><h3>Key derivation</h3><span class="count">4</span></header>
+          <p>HKDF, PBKDF2, scrypt and Argon2.</p>
+        </article>
+        <article class="group">
+          <header><span class="badge" style="background:#e53935">RSA</span><h3>RSA</h3><span class="count">7</span></header>
+          <p>Key pairs, PKCS #1 v1.5 and PSS signatures, OAEP encryption, RSA KEM.</p>
+        </article>
+        <article class="group">
+          <header><span class="badge" style="background:#00acc1">EC</span><h3>Elliptic curves</h3><span class="count">18</span></header>
+          <p>ECDSA, EdDSA (Ed25519, Ed448), ECDH, X25519 / X448, DHKEM, SM2.</p>
+        </article>
+        <article class="group">
+          <header><span class="badge" style="background:#d81b60">PQ</span><h3>Post-quantum</h3><span class="count">9</span></header>
+          <p>ML-KEM (Kyber), ML-DSA (Dilithium) and SLH-DSA (SPHINCS+).</p>
+        </article>
+        <article class="group">
+          <header><span class="badge" style="background:#9e9d24">DH</span><h3>Diffie–Hellman</h3><span class="count">2</span></header>
+          <p>Finite-field key pairs and key agreement.</p>
+        </article>
+        <article class="group">
+          <header><span class="badge" style="background:#8d6e63">KEY</span><h3>Key tools</h3><span class="count">8</span></header>
+          <p>Convert keys between formats, extract raw bytes, inspect details, PKCS #12 export and import.</p>
+        </article>
+        <article class="group">
+          <header><span class="badge" style="background:#78909c">64</span><h3>Encoding</h3><span class="count">7</span></header>
+          <p>Base64, hex, concatenate, XOR and slice.</p>
+        </article>
+        <article class="group">
+          <header><span class="badge" style="background:#fdd835;color:#3a3200">IF</span><h3>Logic</h3><span class="count">8</span></header>
+          <p>Equals, not equals, greater / less than, not, if / else.</p>
+        </article>
+        <article class="group">
+          <header><span class="badge" style="background:#4caf50">IN</span><h3>Sources &amp; display</h3><span class="count">6</span></header>
+          <p>Text, hex, random bytes and your own private keys in; hex and text results out.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="formats">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Standard formats</span>
+        <h2>Keys the way other tools expect them</h2>
+        <p>Paste a key from a test vector or a .pem file, convert between structures, and save any output to a file.</p>
+      </div>
+      <div class="formats">
+        <span>PEM</span><span>DER</span><span>PKCS #8</span><span>SubjectPublicKeyInfo</span><span>PKCS #1</span>
+        <span>SEC 1</span><span>JWK</span><span>PKCS #12 (.p12)</span><span>Raw key bytes</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="download">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Download</span>
+        <h2>Get CryptoPlayground</h2>
+        <p>Open the disk image and drag CryptoPlayground to your Applications folder.</p>
+      </div>
+      <div class="facts">
+        <div><strong>macOS 14.4 or later</strong><span>Intel and Apple Silicon, one app for both</span></div>
+        <div><strong>Signed and notarized</strong><span>Checked by Apple, opens without warnings</span></div>
+        <div><strong>Works offline</strong><span>No account, no network access, no data collected</span></div>
+        <div><strong>Self-contained</strong><span>Everything included, nothing else to install</span></div>
+      </div>
+      <div class="actions">
+        <a class="button primary" href="CryptoPlayground.dmg" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+          Download CryptoPlayground 1.0
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 GrabLogic</span>
+    <nav aria-label="Footer">
+      <a href="./">All apps</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
