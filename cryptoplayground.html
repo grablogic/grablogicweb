@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CryptoPlayground — Build cryptography by drawing it</title>
-  <meta name="description" content="CryptoPlayground is a macOS app for exploring cryptography: drag hashes, ciphers, signatures and key exchanges onto a canvas, connect them and see live results, with generated C++ and Python code and textbook diagrams.">
+  <meta name="description" content="CryptoPlayground is an app for macOS and Windows for exploring cryptography: drag hashes, ciphers, signatures and key exchanges onto a canvas, connect them and see live results, with generated C++ and Python code and textbook diagrams.">
   <link rel="canonical" href="https://grablogic.com/cryptoplayground.html">
   <link rel="icon" href="cryptoplayground-icon.png" type="image/png">
   <meta property="og:type" content="product">
@@ -36,9 +36,13 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
           Download for macOS
         </a>
+        <a class="button primary" href="CryptoPlayground-1.0-setup.exe" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+          Download for Windows
+        </a>
         <a class="button ghost" href="#features">See what it does</a>
       </div>
-      <p class="meta"><span>Version 1.0</span><span>28 MB</span><span>macOS 14.4 or later, Intel and Apple Silicon</span></p>
+      <p class="meta"><span>Version 1.0</span><span>macOS 14.4 or later, Intel and Apple Silicon (28 MB)</span><span>Windows 10 or 11, 64-bit (18 MB)</span></p>
       <div class="shot hero-shot">
         <img src="cp-canvas.jpg" alt="The CryptoPlayground canvas: two EC key pairs feed ECDH, HKDF derives an AES key, and AES-256-GCM encrypts a message" width="2000" height="1194">
       </div>
@@ -195,18 +199,23 @@ ciphertext = ctx.<span class="f">update</span>(<span class="s">b"Meet me at noon
       <div class="section-head">
         <span class="eyebrow">Download</span>
         <h2>Get CryptoPlayground</h2>
-        <p>Open the disk image and drag CryptoPlayground to your Applications folder.</p>
+        <p>On macOS, open the disk image and drag CryptoPlayground to your Applications folder.
+          On Windows, run the installer.</p>
       </div>
       <div class="facts">
-        <div><strong>macOS 14.4 or later</strong><span>Intel and Apple Silicon, one app for both</span></div>
-        <div><strong>Signed and notarized</strong><span>Checked by Apple, opens without warnings</span></div>
+        <div><strong>macOS 14.4 or later</strong><span>Intel and Apple Silicon, one app for both. Signed and notarized by Apple, opens without warnings</span></div>
+        <div><strong>Windows 10 or 11, 64-bit</strong><span>Not code-signed yet: if Windows warns, choose More info, then Run anyway</span></div>
         <div><strong>Works offline</strong><span>No account, no network access, no data collected</span></div>
         <div><strong>Self-contained</strong><span>Everything included, nothing else to install</span></div>
       </div>
       <div class="actions">
         <a class="button primary" href="CryptoPlayground.dmg" download>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
-          Download CryptoPlayground 1.0
+          Download for macOS
+        </a>
+        <a class="button primary" href="CryptoPlayground-1.0-setup.exe" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+          Download for Windows
         </a>
       </div>
     </div>

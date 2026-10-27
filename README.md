@@ -9,7 +9,8 @@ cryptoplayground.html          CryptoPlayground page
 site.css                       All styles
 cp-*.jpg, cp-diagram.png       CryptoPlayground screenshots
 cryptoplayground-icon.png      CryptoPlayground icon
-CryptoPlayground.dmg           The download
+CryptoPlayground.dmg           The macOS download
+CryptoPlayground-1.0-setup.exe The Windows installer
 CNAME                          Custom domain (grablogic.com)
 .nojekyll                      Serve files as they are, without Jekyll
 ```
@@ -48,6 +49,10 @@ cp ../cryptoplayground/dist/CryptoPlayground.dmg .
 ```
 
 and update the version and size on `cryptoplayground.html`.
+
+For Windows, build the installer on a Windows machine (`scripts\build-windows.ps1`), copy
+`CryptoPlayground-<version>-setup.exe` here, and update its file name and size on
+`cryptoplayground.html`.
 
 The disk image is committed to the repository (GitHub allows files up to 100 MB). To keep the
 repository small over many releases, attach the `.dmg` to a GitHub Release instead and change the
