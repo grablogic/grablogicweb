@@ -1,0 +1,98 @@
+<!doctype html>
+<!-- Page that runs the WebAssembly build; scripts/build-web.sh copies it next to
+     CryptoPlayground.js / .wasm and qtloader.js. Colours follow grablogic.com. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- 1:1 between CSS pixels and Qt's device independent pixels -->
+  <meta name="viewport" content="width=device-width, height=device-height, user-scalable=0">
+  <title>CryptoPlayground</title>
+  <meta name="description" content="CryptoPlayground in your browser: drag hashes, ciphers, signatures and key exchanges onto a model, connect them and see live results.">
+  <link rel="icon" href="icon.png" type="image/png">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --text: #e6ebf2;
+      --text-soft: #a3aec0;
+      --accent: #8b95ff;
+      --accent-2: #38c8ff;
+      color-scheme: dark;
+    }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); }
+    body { color: var(--text); font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    #screen { width: 100%; height: 100%; display: none; }
+    #loading {
+      height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 18px; padding: 0 16px; text-align: center; box-sizing: border-box;
+    }
+    #loading img { width: 96px; height: 96px; border-radius: 22px; }
+    #loading h1 { margin: 0; font-size: 1.6rem; font-weight: 700; }
+    #status { color: var(--text-soft); min-height: 1.5em; }
+    .bar { width: min(280px, 80vw); height: 4px; border-radius: 2px; background: #263142; overflow: hidden; }
+    .bar::after {
+      content: ""; display: block; width: 40%; height: 100%; border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      animation: slide 1.2s ease-in-out infinite;
+    }
+    @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+    #note { color: var(--text-soft); font-size: 0.9rem; max-width: 420px; display: none; }
+    .stopped .bar { display: none; }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <img src="icon.png" alt="">
+    <h1>CryptoPlayground</h1>
+    <div class="bar" aria-hidden="true"></div>
+    <div id="status">Loading…</div>
+    <div id="note">CryptoPlayground is made for a computer screen. On a phone it works, but it is cramped.</div>
+    <noscript>CryptoPlayground needs JavaScript to run in the browser.</noscript>
+  </div>
+  <div id="screen"></div>
+
+  <script>
+    // The app sets window.cryptoPlaygroundModified when the project has unsaved changes
+    window.addEventListener('beforeunload', event => {
+      if (window.cryptoPlaygroundModified) {
+        event.preventDefault();
+        event.returnValue = '';
+      }
+    });
+
+    async function start() {
+      const loading = document.getElementById('loading');
+      const screen = document.getElementById('screen');
+      const status = document.getElementById('status');
+      if (window.innerWidth < 900)
+        document.getElementById('note').style.display = 'block';
+
+      const stop = text => {
+        status.textContent = text;
+        loading.classList.add('stopped');
+        loading.style.display = 'flex';
+        screen.style.display = 'none';
+      };
+
+      try {
+        await qtLoad({
+          qt: {
+            containerElements: [screen],
+            entryFunction: window.CryptoPlayground_entry,
+            onLoaded: () => {
+              loading.style.display = 'none';
+              screen.style.display = 'block';
+            },
+            onExit: exit => stop(exit.text ? `CryptoPlayground stopped: ${exit.text}` : 'CryptoPlayground stopped. Reload the page to start again.'),
+          },
+        });
+      } catch (error) {
+        console.error(error);
+        stop('CryptoPlayground could not start in this browser. Try a current version of Chrome, Edge, Firefox or Safari.');
+      }
+    }
+  </script>
+  <script src="CryptoPlayground.js"></script>
+  <script src="qtloader.js"></script>
+  <script>start();</script>
+</body>
+</html>
