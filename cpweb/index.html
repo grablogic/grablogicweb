@@ -43,6 +43,13 @@
     .facts span::before { content: "✓ "; color: var(--ok); }
     #note { color: var(--text-soft); font-size: 0.9rem; max-width: 420px; display: none; }
     .stopped .bar, .stopped .info span:last-child { display: none; }
+    .stopped .info { justify-content: center; }
+    #help { display: none; max-width: 440px; color: var(--text-soft); font-size: 0.9rem; }
+    #help p { margin: 0 0 12px; }
+    #help kbd { font: 0.8rem/1.4 ui-monospace, Menlo, Consolas, monospace; color: var(--text); background: #3a3a3a; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+    #reload { font: inherit; font-weight: 600; color: white; background: var(--accent); border: none; border-radius: 8px; padding: 8px 18px; cursor: pointer; }
+    #reload:hover { background: #3a8ff0; }
+    #reload:disabled { opacity: 0.6; cursor: default; }
   </style>
 </head>
 <body>
@@ -52,6 +59,11 @@
     <div class="sub">Hashes, ciphers, signatures and key exchanges, live in your browser</div>
     <div class="bar" id="bar" aria-hidden="true"><i></i></div>
     <div class="info"><span id="status">Loading…</span><span>Faster next time</span></div>
+    <div id="help">
+      <p>This usually happens right after an update, when the browser still has parts of the previous version saved. Loading fresh copies fixes it.</p>
+      <p><button id="reload" type="button">Reload</button></p>
+      <p>If that doesn't help, reload without the cache: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> (Windows), <kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> (Chrome, Edge, Firefox on Mac) or <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>R</kbd> (Safari).</p>
+    </div>
     <div id="note">CryptoPlayground is made for a computer screen. On a phone it works, but it is cramped.</div>
     <div class="facts"><span>Nothing to install</span><span>Runs on your device</span><span>Same app as macOS and Windows</span></div>
     <noscript>CryptoPlayground needs JavaScript to run in the browser.</noscript>
@@ -96,6 +108,16 @@
       }
     });
 
+    // Fetch every file again past the browser's cache, so that all of them are
+    // from the same version, then start over
+    document.getElementById('reload').addEventListener('click', async event => {
+      event.target.disabled = true;
+      event.target.textContent = 'Loading fresh copies…';
+      const files = ['index.html', 'CryptoPlayground.js', 'CryptoPlayground.wasm', 'qtloader.js'];
+      await Promise.allSettled(files.map(file => realFetch(file, { cache: 'reload' })));
+      location.reload();
+    });
+
     async function start() {
       const loading = document.getElementById('loading');
       const screen = document.getElementById('screen');
@@ -123,7 +145,8 @@
         });
       } catch (error) {
         console.error(error);
-        stop('CryptoPlayground could not start in this browser. Try a current version of Chrome, Edge, Firefox or Safari.');
+        stop('CryptoPlayground could not start.');
+        document.getElementById('help').style.display = 'block';
       }
     }
   </script>
