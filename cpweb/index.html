@@ -1,6 +1,7 @@
 <!doctype html>
 <!-- Page that runs the WebAssembly build; scripts/build-web.sh copies it next to
-     CryptoPlayground.js / .wasm and qtloader.js. Colours follow grablogic.com. -->
+     CryptoPlayground.js / .wasm and qtloader.js and fills in the .wasm size.
+     Colours follow the app's dark theme. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -11,11 +12,14 @@
   <link rel="icon" href="icon.png" type="image/png">
   <style>
     :root {
-      --bg: #0d1117;
-      --text: #e6ebf2;
-      --text-soft: #a3aec0;
-      --accent: #8b95ff;
-      --accent-2: #38c8ff;
+      --bg: #262626;
+      --line: #3d3d3d;
+      --text: #e6e6e6;
+      --text-soft: #a8a8a8;
+      --text-faint: #7c7c7c;
+      --accent: #2680eb;
+      --accent-2: #7a86f5;
+      --ok: #3fb950;
       color-scheme: dark;
     }
     html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); }
@@ -23,34 +27,67 @@
     #screen { width: 100%; height: 100%; display: none; }
     #loading {
       height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 18px; padding: 0 16px; text-align: center; box-sizing: border-box;
+      gap: 14px; padding: 0 16px; text-align: center; box-sizing: border-box;
+      background: radial-gradient(700px 450px at 50% 38%, rgba(38, 128, 235, 0.12), transparent 65%), var(--bg);
     }
-    #loading img { width: 96px; height: 96px; border-radius: 22px; }
-    #loading h1 { margin: 0; font-size: 1.6rem; font-weight: 700; }
-    #status { color: var(--text-soft); min-height: 1.5em; }
-    .bar { width: min(280px, 80vw); height: 4px; border-radius: 2px; background: #263142; overflow: hidden; }
-    .bar::after {
-      content: ""; display: block; width: 40%; height: 100%; border-radius: 2px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      animation: slide 1.2s ease-in-out infinite;
-    }
+    #loading img { width: 96px; height: 96px; border-radius: 22px; box-shadow: 0 18px 50px rgba(38, 128, 235, 0.25); }
+    #loading h1 { margin: 8px 0 0; font-size: 1.6rem; font-weight: 700; }
+    .sub { color: var(--text-soft); margin-top: -6px; }
+    .bar { width: min(320px, 80vw); height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 12px; }
+    .bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width 0.2s; }
+    /* Size unknown: a moving stripe instead */
+    .bar.unknown i { width: 40%; animation: slide 1.2s ease-in-out infinite; }
     @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+    .info { display: flex; justify-content: space-between; gap: 12px; width: min(320px, 80vw); color: var(--text-faint); font-size: 0.8rem; }
+    .facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 22px; margin-top: 22px; color: var(--text-faint); font-size: 0.8rem; }
+    .facts span::before { content: "✓ "; color: var(--ok); }
     #note { color: var(--text-soft); font-size: 0.9rem; max-width: 420px; display: none; }
-    .stopped .bar { display: none; }
+    .stopped .bar, .stopped .info span:last-child { display: none; }
   </style>
 </head>
 <body>
   <div id="loading">
     <img src="icon.png" alt="">
     <h1>CryptoPlayground</h1>
-    <div class="bar" aria-hidden="true"></div>
-    <div id="status">Loading…</div>
+    <div class="sub">Hashes, ciphers, signatures and key exchanges, live in your browser</div>
+    <div class="bar" id="bar" aria-hidden="true"><i></i></div>
+    <div class="info"><span id="status">Loading…</span><span>Faster next time</span></div>
     <div id="note">CryptoPlayground is made for a computer screen. On a phone it works, but it is cramped.</div>
+    <div class="facts"><span>Nothing to install</span><span>Runs on your device</span><span>Same app as macOS and Windows</span></div>
     <noscript>CryptoPlayground needs JavaScript to run in the browser.</noscript>
   </div>
   <div id="screen"></div>
 
   <script>
+    // Size of CryptoPlayground.wasm as served, filled in by build-web.sh (0: unknown)
+    const wasmBytes = Number('21957989') || 0;
+
+    const bar = document.getElementById('bar');
+    const status = document.getElementById('status');
+    if (!wasmBytes)
+      bar.classList.add('unknown');
+
+    // Count the bytes of the .wasm as they arrive. Counted after decompression,
+    // so the known (uncompressed) size gives the right percentage either way.
+    const realFetch = window.fetch.bind(window);
+    window.fetch = async (input, init) => {
+      const response = await realFetch(input, init);
+      const url = typeof input === 'string' ? input : input.url;
+      if (!url.includes('.wasm') || !response.body || !wasmBytes)
+        return response;
+      let loaded = 0;
+      const counted = response.body.pipeThrough(new TransformStream({
+        transform(chunk, controller) {
+          loaded += chunk.byteLength;
+          const part = Math.min(1, loaded / wasmBytes);
+          bar.firstElementChild.style.width = `${(part * 100).toFixed(1)}%`;
+          status.textContent = part < 1 ? `Loading… ${Math.round(part * 100)}%` : 'Starting…';
+          controller.enqueue(chunk);
+        },
+      }));
+      return new Response(counted, { status: response.status, statusText: response.statusText, headers: response.headers });
+    };
+
     // The app sets window.cryptoPlaygroundModified when the project has unsaved changes
     window.addEventListener('beforeunload', event => {
       if (window.cryptoPlaygroundModified) {
@@ -62,7 +99,6 @@
     async function start() {
       const loading = document.getElementById('loading');
       const screen = document.getElementById('screen');
-      const status = document.getElementById('status');
       if (window.innerWidth < 900)
         document.getElementById('note').style.display = 'block';
 
