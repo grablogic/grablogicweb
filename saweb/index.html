@@ -40,7 +40,7 @@
   </div>
   <div id="screen"></div>
   <script>
-    const wasmBytes = Number('19382801') || 0;
+    const wasmBytes = Number('19379667') || 0;
     const bar = document.getElementById('bar');
     const status = document.getElementById('status');
     if (!wasmBytes) bar.classList.add('unknown');
@@ -72,6 +72,14 @@
     async function start() {
       const loading = document.getElementById('loading');
       const screen = document.getElementById('screen');
+      // Browsers do not load WebAssembly from a file opened directly from disk
+      if (location.protocol === 'file:') {
+        bar.style.display = 'none';
+        status.innerHTML = 'This page has to be opened through a web server, not as a file.<br>' +
+          'In this folder run <code>python3 -m http.server 8000</code> and open <b>http://localhost:8000</b>';
+        status.style.color = '#e6e6e6';
+        return;
+      }
       try {
         await qtLoad({
           qt: {
