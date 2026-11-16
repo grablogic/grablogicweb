@@ -1,0 +1,94 @@
+<!doctype html>
+<!-- Page that runs the WebAssembly build; scripts/build-web.sh copies it next to
+     SimpleArchitect.js / .wasm and qtloader.js and fills in the .wasm size. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height, user-scalable=0">
+  <title>Simple Architect</title>
+  <meta name="description" content="Simple Architect in your browser: draw walls, doors, windows and roofs in 2D and see the house in 3D.">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <style>
+    :root { --bg: #262626; --line: #3d3d3d; --text: #e6e6e6; --soft: #a8a8a8; --faint: #7c7c7c; --accent: #2680eb; --ok: #3fb950; color-scheme: dark; }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); }
+    body { color: var(--text); font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    #screen { width: 100%; height: 100%; display: none; }
+    #loading { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+      padding: 0 16px; box-sizing: border-box; text-align: center;
+      background: radial-gradient(700px 450px at 50% 38%, rgba(38, 128, 235, 0.12), transparent 65%), var(--bg); }
+    #loading img { width: 96px; height: 96px; border-radius: 22px; box-shadow: 0 18px 50px rgba(38, 128, 235, 0.25); }
+    #loading h1 { margin: 8px 0 0; font-size: 1.6rem; font-weight: 700; }
+    .sub { color: var(--soft); margin-top: -6px; }
+    .bar { width: min(320px, 80vw); height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 12px; }
+    .bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--accent); transition: width 0.2s; }
+    .bar.unknown i { width: 40%; animation: slide 1.2s ease-in-out infinite; }
+    @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+    #status { color: var(--faint); font-size: 0.85rem; }
+    .facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 22px; margin-top: 22px; color: var(--faint); font-size: 0.8rem; }
+    .facts span::before { content: "✓ "; color: var(--ok); }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <img src="icon.svg" alt="">
+    <h1>Simple Architect</h1>
+    <div class="sub">Draw walls, doors, windows and roofs in 2D – see the house in 3D</div>
+    <div class="bar" id="bar" aria-hidden="true"><i></i></div>
+    <div id="status">Loading…</div>
+    <div class="facts"><span>Nothing to install</span><span>Runs on your device</span><span>Same app as the desktop version</span></div>
+    <noscript>Simple Architect needs JavaScript to run in the browser.</noscript>
+  </div>
+  <div id="screen"></div>
+  <script>
+    const wasmBytes = Number('19382801') || 0;
+    const bar = document.getElementById('bar');
+    const status = document.getElementById('status');
+    if (!wasmBytes) bar.classList.add('unknown');
+
+    // progress: count the .wasm bytes as they arrive
+    const realFetch = window.fetch.bind(window);
+    window.fetch = async (input, init) => {
+      const response = await realFetch(input, init);
+      const url = typeof input === 'string' ? input : input.url;
+      if (!url.includes('.wasm') || !response.body || !wasmBytes) return response;
+      let loaded = 0;
+      const counted = response.body.pipeThrough(new TransformStream({
+        transform(chunk, controller) {
+          loaded += chunk.byteLength;
+          const part = Math.min(1, loaded / wasmBytes);
+          bar.firstElementChild.style.width = `${(part * 100).toFixed(1)}%`;
+          status.textContent = part < 1 ? `Loading… ${Math.round(part * 100)}%` : 'Starting…';
+          controller.enqueue(chunk);
+        },
+      }));
+      return new Response(counted, { status: response.status, statusText: response.statusText, headers: response.headers });
+    };
+
+    // the app sets window.simpleArchitectModified while there are unsaved changes
+    window.addEventListener('beforeunload', event => {
+      if (window.simpleArchitectModified) { event.preventDefault(); event.returnValue = ''; }
+    });
+
+    async function start() {
+      const loading = document.getElementById('loading');
+      const screen = document.getElementById('screen');
+      try {
+        await qtLoad({
+          qt: {
+            containerElements: [screen],
+            entryFunction: window.SimpleArchitect_entry,
+            onLoaded: () => { loading.style.display = 'none'; screen.style.display = 'block'; },
+            onExit: exit => { status.textContent = exit.text ? `Stopped: ${exit.text}` : 'Stopped. Reload the page to start again.'; loading.style.display = 'flex'; screen.style.display = 'none'; },
+          },
+        });
+      } catch (error) {
+        console.error(error);
+        status.textContent = 'Simple Architect could not start (WebGL 2 is needed).';
+      }
+    }
+  </script>
+  <script src="SimpleArchitect.js"></script>
+  <script src="qtloader.js"></script>
+  <script>start();</script>
+</body>
+</html>
